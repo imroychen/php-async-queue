@@ -41,4 +41,4 @@ new Service()->listen()
 ## MySetting::storage
 [详情](./src/Setting.php)
 
-[示例](example/QueueConfig/MyStorage.php)
+[示例](./example/Queue2Config/MyDbStorage.php)
