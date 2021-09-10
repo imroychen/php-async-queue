@@ -1,0 +1,23 @@
+{
+	"name": "iry/queue",
+	"description": "A simple asynchronous queue library.(一个简单php异步队列库)",
+	"type": "library",
+	"license": "Apache-2.0",
+	"keywords": ["php async queue","php-qeue"],
+	"authors": [
+		{
+			"name": "RoyChen",
+			"email": "hi@imroy.cn"
+		}
+	],
+	"require": {
+		"php": ">=5.4.0",
+		"iry/cli": "^1.0",
+      	"ext-json": "*"
+    },
+	"autoload": {
+		"psr-4": {
+			"iry\\e\\": "src"
+		}
+	}
+}
