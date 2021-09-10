@@ -12,7 +12,6 @@
 	],
 	"require": {
 		"php": ">=5.4.0",
-		"iry/cli": "^1.0",
       	"ext-json": "*"
     },
 	"autoload": {
