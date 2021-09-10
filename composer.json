@@ -1,5 +1,5 @@
 {
-	"name": "iry/queue",
+	"name": "iry/async-queue",
 	"description": "A simple asynchronous queue library.(一个简单php异步队列库)",
 	"type": "library",
 	"license": "Apache-2.0",
@@ -17,7 +17,7 @@
     },
 	"autoload": {
 		"psr-4": {
-			"iry\\e\\": "src"
+			"iry\\queue\\": "src"
 		}
 	}
 }
