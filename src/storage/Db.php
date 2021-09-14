@@ -52,7 +52,7 @@ abstract class Db extends Base
         $queueId = false;
         if(!empty($sign)){
             $res = $this->_getRecord($this->_sql('select `id` from {{:table}} where q_sign='.var_export(strval($sign),true) .' limit 0,1'));
-            $queueId = (isset($res['id'])&& empty($res['id']))?$res['id']:false;
+            $queueId = (isset($res['id'])&& !empty($res['id']))?$res['id']:false;
         }
         return $queueId;
     }
