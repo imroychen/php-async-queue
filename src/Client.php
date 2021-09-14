@@ -33,8 +33,8 @@ class Client extends Base
      * @param bool $uniq
      */
 
-    function delayedExec($name,$args,$delay,$uniq=true){
-        $this->create($name,$args,time()+$delay,$uniq);
+    function delayedExec($name,$args,$tags=[],$delay=1,$uniq=true){
+        $this->create($name,$args,$tags,time()+$delay,$uniq);
     }
 
     /**
@@ -44,11 +44,12 @@ class Client extends Base
      * @param bool $unique 是否去重
      * @return bool|int|string
      */
-    function create($name,$args,$execTime=0,$unique=true){
+    function create($name,$args,$tags=[],$execTime=0,$unique=true){
         $data = [
             'q_name'=>$name,
             'q_args'=>$args,
             'q_exec_time'=>$execTime,
+            'q_tag'=>is_array($tags)?implode(',',$tags):$tags
         ];
 
         if(is_callable([$this->_setting,'beforeCreate']) && call_user_func([$this->_setting,'beforeCreate'],$name,$this)) {

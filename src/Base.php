@@ -34,8 +34,8 @@ class Base
         $this->_signalFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.'async-queue-signal'.substr(md5(get_class($this->_setting)),8,10);
 
         $driver = $this->_setting->storage();
-        list($storageCls,$storeageArgs)=explode('?',$driver.'?');
+        list($storageCls,$storageArgs)=explode('?',$driver.'?');
         $storageCls = str_replace('@',__NAMESPACE__.'\\storage\\',$storageCls);
-        $this->_driver = new $storageCls($storeageArgs);
+        $this->_driver = new $storageCls($storageArgs);
     }
 }
