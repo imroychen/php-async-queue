@@ -13,9 +13,9 @@ $client = new Client(SettingTest2::class);
 
 $client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2']);//创建异步任务
 
-$client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],time()+3600);//创建一个延时1小时的异步任务
+$client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],'',time()+3600);//创建一个延时1小时的异步任务
 
-$client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],time()+3600,false);//关闭重复检查（允许重复添加）
+$client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],'',time()+3600,false);//关闭重复检查（允许重复添加）
 
 
 
@@ -27,6 +27,6 @@ $client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],time()+3600,fa
 
 $client = Client::m(SettingTest2::class);
 //下面两个方法等效
-$client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],time()+3600);
+$client->create('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],'',time()+3600);
 
-$client->delayedExec('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],3600);
+$client->delayedExec('test_name',['test_arg_1'=>'1','test_arg_2'=>'2'],'',3600);
