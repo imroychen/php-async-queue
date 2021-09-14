@@ -49,7 +49,7 @@ class Client extends Base
             'q_name'=>$name,
             'q_args'=>$args,
             'q_exec_time'=>$execTime,
-            'q_tag'=>is_array($tags)?implode(',',$tags):$tags
+            'q_tags'=>is_array($tags)?implode(',',$tags):$tags
         ];
 
         if(is_callable([$this->_setting,'beforeCreate']) && call_user_func([$this->_setting,'beforeCreate'],$name,$this)) {
