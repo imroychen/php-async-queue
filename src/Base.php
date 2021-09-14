@@ -4,6 +4,7 @@ namespace iry\queue;
 
 class Base
 {
+    const VERSION = 1.0;
     protected $_signalFile;
     /**
      * @var storage\Redis | storage\Db
