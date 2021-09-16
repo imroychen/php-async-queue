@@ -43,6 +43,7 @@ abstract class Db extends Base
         return (!empty($data) && !empty($data[0]))? $data[0]:[];
     }
 
+
     /**
      * 检查任务是否存在
      * @param string $sign
