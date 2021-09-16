@@ -105,7 +105,8 @@ abstract class Db extends Base
     }
 
     private function _setExecTime($id,$time){
-        $this->_exec($this->_sql('update {{:table}} set q_exec_time='.time()+30),'update')!==false;//锁定30S
+        $id = var_export($id);
+        $this->_exec($this->_sql('update {{:table}} set `q_exec_time`='.(time()+30).' where id='.$id),'update')!==false;//锁定30S
     }
 
     /**
