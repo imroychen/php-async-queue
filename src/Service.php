@@ -42,7 +42,7 @@ class Service extends Base
         while (1) {
             if(file_get_contents($lockFile)!=$locker){exit("Quit / 被踢出");}
 
-            $task = $this->_driver->scan();
+            $task = $this->_driver->scan(40);
             if(empty($task)){
                 $this->_waitSignal(-1);
             }
@@ -53,7 +53,8 @@ class Service extends Base
                 $taskId = $task['id'];
                 $taskName = $task['q_name'];
                 $taskArgs = $task['q_args'];
-                $r = $this->_setting->processMsg($taskId, $taskName, $taskArgs);
+                $taskTags = isset($task['q_tags'])?$task['q_tags']:'';
+                $r = $this->_setting->processMsg($taskId, $taskName, $taskArgs,$taskTags);
                 if ($r) {
                     $this->_driver->remove($taskId);
                 }

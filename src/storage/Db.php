@@ -52,7 +52,7 @@ abstract class Db extends Base
         $queueId = false;
         if(!empty($sign)){
             $res = $this->_getRecord($this->_sql('select `id` from {{:table}} where q_sign='.var_export(strval($sign),true) .' limit 0,1'));
-            $queueId = (isset($res['id'])&& !empty($res['id']))?$res['id']:false;
+            $queueId = (!empty($res) && isset($res['id']))?$res['id']:false;
         }
         return $queueId;
     }
@@ -104,15 +104,22 @@ abstract class Db extends Base
         return $r!==false;
     }
 
+    private function _setExecTime($id,$time){
+        $this->_exec($this->_sql('update {{:table}} set q_exec_time='.time()+30),'update')!==false;//锁定30S
+    }
+
     /**
      * 按照先进先出的原则 返回一条时间到了的数据
      * @return array
      */
 
-    public function scan(){
+    public function scan($lockTime=40){
         $time = time();
         $r =  $this->_getRecord($this->_sql('select * from {{:table}} where `q_exec_time`<'.$time.' order by `q_exec_time`'.' limit 0,1'));
         if(is_array($r) && !empty($r)) {
+            if($lockTime>0) {
+                $this->_setExecTime($r['id'],$time+$lockTime);
+            }
             $r['q_args'] = empty($r['q_args'])? []:unserialize($r['q_args']);
             return $r;
         }

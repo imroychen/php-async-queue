@@ -32,9 +32,9 @@ class ProcessComm
         return null;
     }
 
-    public function rm(){
+    public function rm($key){
         if($this->_shm) {
-            shm_remove($this->_shm);
+            shm_remove($this->_shm,$key);
         }
         return true;
     }
@@ -45,11 +45,29 @@ class ProcessComm
         }
     }
 
-    public function __destruct(){
-        $this->close();
-    }
-
     /*function wait($datakey){
         $data = $this->get($datakey);
     }*/
+    function wait($key,$timeout=-1){
+        $sleepGap = 1000000 / 50;//50次/s
+        $overtime = time()+$timeout;
+        if($this->_shm) {
+            while (1) {
+                $v = shm_get_var($this->_shm, $key);
+                if (!is_null($v)) {
+                    shm_remove($this->_shm, $key);
+                    return $v;
+                }
+                if(time()>$overtime){
+                    return null;
+                }
+                usleep($sleepGap);
+            }
+        }
+        return null;
+    }
+
+    public function __destruct(){
+        $this->close();
+    }
 }

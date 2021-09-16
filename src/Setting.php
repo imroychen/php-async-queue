@@ -8,7 +8,7 @@ interface Setting
      * 处理队列的方法 （服务端使用）
      * @return bool 成功队列将会被移除
      */
-    function processMsg($taskId,$taskName,$taskArgs);
+    function processMsg($taskId,$taskName,$taskArgs,$taskTags);
 
     /**
      * ClassName?参数

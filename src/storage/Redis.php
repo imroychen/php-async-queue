@@ -71,12 +71,17 @@ class Redis extends Base
         return (bool)$res;
     }
 
+    private function _setExecTime($id,$time){
+        $this->_redis->zAdd($this->_dataset, $time,$id );
+        return true;
+    }
+
     /**
      * 按照先进先出的原则 返回一条时间到了的数据
      * @return array
      */
 
-    public function scan(){
+    public function scan($lockTime = 40){
         $records = $this->_redis->zRange($this->_dataset, 0, 0, true);
 
         if(!empty($records)) {
@@ -84,6 +89,9 @@ class Redis extends Base
                 $res = json_decode($text, true);
                 $res = is_array($res) ? $res : [];
                 $res['id'] = $text;
+                if($lockTime>0) {
+                    $this->_setExecTime($text, time() + $lockTime);
+                }
                 return  $res;
             }
         }
