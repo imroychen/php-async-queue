@@ -99,13 +99,13 @@ abstract class Db extends Base
      */
     public function remove($id)
     {
-        $id = var_export(strval($id),true);
+        $id = var_export($id,true);
         $r = $this->_exec($this->_sql('delete from {{:table}} where `id`='.$id),'delete');
         return $r!==false;
     }
 
     private function _setExecTime($id,$time){
-        $id = var_export($id);
+        $id = var_export($id,true);
         $this->_exec($this->_sql('update {{:table}} set `q_exec_time`='.(time()+30).' where id='.$id),'update')!==false;//锁定30S
     }
 
