@@ -12,9 +12,11 @@ class MyDbStorage extends Db
     private $_db;
     protected function _init($args, $rawArgs)
     {
-
         parent::_init($args, $rawArgs);
-        $this->_db = new \PDO($args['dsn']);
+        $username = isset($args["username"])?$args["username"]:null;
+        $password = isset($args["password"])?$args["password"]:null;
+
+        $this->_db = new \PDO($args['dsn'],$username,$password);
     }
 
     /**
@@ -29,7 +31,6 @@ class MyDbStorage extends Db
             $sth->execute();
             $_result = $sth->fetchAll(\PDO::FETCH_CLASS);
 
-            $result = [];
             if(!empty($_result)){
                 foreach ($_result as &$v) {
                     if (is_object($v)) {
@@ -37,8 +38,7 @@ class MyDbStorage extends Db
                     }
                 }unset($v);
             }
-
-            return $result;
+            return $_result;
         }
         return [];
     }
