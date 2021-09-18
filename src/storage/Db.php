@@ -188,16 +188,21 @@ SQL;
             echo "\n----------------------------------\n";
             echo "\n".$this->_sql($createSql)."\n\n";
             echo "\n----------------------------------\n";
-        }elseif($createTable>0){
-            $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$this->_getVersion()],'q_exec_time'=>time()+86400*365*20],$sign);
+            exit ;
         }else{
-            /*
-            //$qid = $this->exists($sign);
-            $res = $this->_getRecord($this->_sql('select `q_args` from {{:table}} where q_sign='.var_export(strval($sign),true) .' limit 0,1'));
-            $args = (isset($res['q_args']) && !empty($res['q_args']))? unserialize($res['q_args']):[];
-            $version = isset($args['version'])?$args['version']:'';
-            //升级版本
-            */
+            $appVersion = $this->_getVersion();
+            $res = $this->_getRecord($this->_sql('select * from {{:table}} where q_sign='.var_export(strval($sign),true) .' limit 0,1'));
+            if(empty($res)){
+                $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$version],'q_exec_time'=>time()+86400*365*20],$sign);
+            }elseif($res['version']<$appVersion){
+                echo "update version 升级版本";
+                //.................
+                //更改数据表结构
+                //.................
+                $this->remove($res['id']);
+                $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$version],'q_exec_time'=>time()+86400*365*20],$sign);
+            }
+            return ;
         }
     }
 }
