@@ -74,6 +74,16 @@ abstract class Db extends Base
         $queueId = $unique?$this->exists($sign):false;
 
         if(!$queueId) {
+            return $this->_create($data, $sign);
+        }
+//        else{
+//            $time = intval($data['q_exec_time']);
+//            return $this->_exec($this->_sql('update {{:table}} set q_exec_time='.$time),'update');
+//        }
+
+        return $queueId;
+    }
+    public function _create($data,$sign){
             $fields = [];
             $values = [];
             $data['q_sign'] = $sign;
@@ -85,13 +95,9 @@ abstract class Db extends Base
             $fieldsStr = implode(',',$fields);
             $valuesStr = implode(',',$values);
             return $this->_exec($this->_sql('insert into {{:table}} (' . $fieldsStr . ') values (' . $valuesStr.')'),'insert');
-        }
-//        else{
-//            $time = intval($data['q_exec_time']);
-//            return $this->_exec($this->_sql('update {{:table}} set q_exec_time='.$time),'update');
-//        }
-        return $queueId;
     }
+
+
 
     /**
      * 移除任务
@@ -153,22 +159,40 @@ abstract class Db extends Base
         return md5($data['q_name'].'//'.var_export($data['q_args'],true));
     }
 
+    //该方法有Service调用
     public function install(){
-        /*
-        $result = $this->query("SHOW TABLES LIKE {{:table}}");
+
         $createSql = <<<SQL
-CREATE TABLE `{{:table}}` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `q_sign` char(32) CHARACTER SET latin1 NOT NULL,
-  `q_name` varchar(100) CHARACTER SET latin1 NOT NULL,
-  `q_args` text CHARACTER SET latin1 NOT NULL COMMENT '//{}',
-  `q_exec_time` int(11) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `q_exec_time` (`q_exec_time`),
-  KEY `q_sign` (`q_sign`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=135 DEFAULT CHARSET=utf8;
+CREATE TABLE {{:table}} (
+     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+     `q_sign` char(32)  NOT NULL,
+     `q_name` varchar(100)  NOT NULL,
+     `q_args` text  NOT NULL COMMENT '//{}',
+     `q_tags` varchar(100)  NOT NULL DEFAULT '',
+     `q_exec_time` int(11) unsigned NOT NULL  DEFAULT 0,
+     PRIMARY KEY (`id`),
+     KEY `q_exec_time` (`q_exec_time`),
+     KEY `q_sign` (`q_sign`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=101 DEFAULT CHARSET=utf8;
 SQL;
-        $this->_exec($createSql);
-        */
+
+        $sign = md5('VERSION');
+        $qid = $this->exists($sign);
+        if(!$qid){
+            $table = $this->_query($this->_sql("SHOW TABLES"));
+            if(!in_array($this->_table,$table)){
+                $createTable = $this->_exec($this->_sql($createSql),'create_table');
+                if($createTable===false){
+                    echo "\n数据表不存在, 请先手动创建";
+                    echo "\nTable does not exist.Please create";
+                    echo "\n----------------------------------\n";
+                    echo "\n".$this->_sql($createSql)."\n\n";
+                    echo "\n----------------------------------\n";
+                }
+            }
+            $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$this->_getVersion()],'q_exec_time'=>time()+86400*365*20],$sign);
+        }else{
+            //$this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$this->_getVersion()],'q_exec_time'=>time()+86400*365*20],$sign);
+        }
     }
 }

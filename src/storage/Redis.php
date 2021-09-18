@@ -124,4 +124,8 @@ class Redis extends Base
     public function createSign($data){
         return json_encode($data);
     }
+
+    public function install(){
+        return true;
+    }
 }

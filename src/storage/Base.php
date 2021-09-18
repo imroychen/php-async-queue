@@ -1,8 +1,7 @@
 <?php
 
 namespace iry\queue\storage;
-
-use iry\e\App;
+use \iry\queue as lib;
 // todo 请使用数据库（单服务器小内存推荐）或者 Redis（大内存或者有独立的Redis服务器推荐）
 abstract class Base
 {
@@ -19,4 +18,8 @@ abstract class Base
     }
 
     abstract protected function _init($args,$rawArgs);
+
+    protected function _getVersion(){
+        return lib\Base::VERSION;
+    }
 }

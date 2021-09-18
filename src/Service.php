@@ -23,6 +23,8 @@ class Service extends Base
             exit('请以CLI模式运行运行 / Please run in CLI mode');
         }
 
+        $this->_driver->install();
+
         $this->_msgInfo = true;
 
         $locker = uniqid().'-'.mt_rand(10,99);
