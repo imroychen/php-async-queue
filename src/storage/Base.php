@@ -22,4 +22,11 @@ abstract class Base
     protected function _getVersion(){
         return lib\Base::VERSION;
     }
+
+    protected function _decode($data){
+        return unserialize($data);
+    }
+    protected function _encode($data){
+        return serialize($data);
+    }
 }

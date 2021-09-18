@@ -84,17 +84,17 @@ abstract class Db extends Base
         return $queueId;
     }
     public function _create($data,$sign){
-            $fields = [];
-            $values = [];
-            $data['q_sign'] = $sign;
-            $data['q_args'] = serialize($data['q_args']);
-            foreach ($data as $f => $v) {
-                $fields[] = '`' . $f . '`';
-                $values[] = var_export($v, true);
-            }
-            $fieldsStr = implode(',',$fields);
-            $valuesStr = implode(',',$values);
-            return $this->_exec($this->_sql('insert into {{:table}} (' . $fieldsStr . ') values (' . $valuesStr.')'),'insert');
+        $fields = [];
+        $values = [];
+        $data['q_sign'] = $sign;
+        $data['q_args'] = $this->_encode($data['q_args']);
+        foreach ($data as $f => $v) {
+            $fields[] = '`' . $f . '`';
+            $values[] = var_export($v, true);
+        }
+        $fieldsStr = implode(',',$fields);
+        $valuesStr = implode(',',$values);
+        return $this->_exec($this->_sql('insert into {{:table}} (' . $fieldsStr . ') values (' . $valuesStr.')'),'insert');
     }
 
 
@@ -128,7 +128,7 @@ abstract class Db extends Base
             if($lockTime>0) {
                 $this->_setExecTime($r['id'],$time+$lockTime);
             }
-            $r['q_args'] = empty($r['q_args'])? []:unserialize($r['q_args']);
+            $r['q_args'] = empty($r['q_args'])? []:$this->_decode($r['q_args']);
             return $r;
         }
         return [];
@@ -189,18 +189,22 @@ SQL;
             echo "\n".$this->_sql($createSql)."\n\n";
             echo "\n----------------------------------\n";
             exit ;
-        }else{
-            $appVersion = $this->_getVersion();
-            $res = $this->_getRecord($this->_sql('select * from {{:table}} where q_sign='.var_export(strval($sign),true) .' limit 0,1'));
-            if(empty($res)){
-                $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$version],'q_exec_time'=>time()+86400*365*20],$sign);
-            }elseif($res['version']<$appVersion){
-                echo "update version 升级版本";
-                //.................
-                //更改数据表结构
-                //.................
-                $this->remove($res['id']);
-                $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$version],'q_exec_time'=>time()+86400*365*20],$sign);
+        }else {
+            $appVersion = $this->_getVersion()*1;
+            $res = $this->_getRecord($this->_sql('select * from {{:table}} where q_sign=' . var_export(strval($sign), true) . ' limit 0,1'));
+            if (empty($res)) {
+                $this->_create(['q_name' => 'VERSION', 'q_args' => ['version' => $version], 'q_exec_time' => time() + 86400 * 365 * 20], $sign);
+            } else {
+                $args = $this->_decode($res['q_args']);
+                $version = (isset($args['version'])?$args['version']:0)*1;
+                if ($version < $appVersion) {
+                    echo "update version 升级版本";
+                    //.................
+                    //更改数据表结构
+                    //.................
+                    $this->remove($res['id']);
+                    $this->_create(['q_name' => 'VERSION', 'q_args' => ['version' => $appVersion], 'q_exec_time' => time() + 86400 * 365 * 20], $sign);
+                }
             }
             return ;
         }
