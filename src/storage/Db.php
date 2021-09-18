@@ -159,11 +159,12 @@ abstract class Db extends Base
         return md5($data['q_name'].'//'.var_export($data['q_args'],true));
     }
 
+
     //该方法有Service调用
     public function install(){
 
         $createSql = <<<SQL
-CREATE TABLE {{:table}} (
+CREATE TABLE IF NOT EXISTS {{:table}} (
      `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
      `q_sign` char(32)  NOT NULL,
      `q_name` varchar(100)  NOT NULL,
@@ -175,24 +176,28 @@ CREATE TABLE {{:table}} (
      KEY `q_sign` (`q_sign`) USING BTREE
 ) ENGINE=MyISAM AUTO_INCREMENT=101 DEFAULT CHARSET=utf8;
 SQL;
+        //$table = $this->_query($this->_sql("SHOW TABLES"));
+        //if(!in_array($this->_table,$table)) {
+        $createTable = $this->_exec($this->_sql($createSql), 'create_table');
+        //}
 
         $sign = md5('VERSION');
-        $qid = $this->exists($sign);
-        if(!$qid){
-            $table = $this->_query($this->_sql("SHOW TABLES"));
-            if(!in_array($this->_table,$table)){
-                $createTable = $this->_exec($this->_sql($createSql),'create_table');
-                if($createTable===false){
-                    echo "\n数据表不存在, 请先手动创建";
-                    echo "\nTable does not exist.Please create";
-                    echo "\n----------------------------------\n";
-                    echo "\n".$this->_sql($createSql)."\n\n";
-                    echo "\n----------------------------------\n";
-                }
-            }
+        if($createTable===false){
+            echo "\n数据表不存在, 请先手动创建";
+            echo "\nTable does not exist.Please create";
+            echo "\n----------------------------------\n";
+            echo "\n".$this->_sql($createSql)."\n\n";
+            echo "\n----------------------------------\n";
+        }elseif($createTable>0){
             $this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$this->_getVersion()],'q_exec_time'=>time()+86400*365*20],$sign);
         }else{
-            //$this->_create(['q_name'=>'VERSION','q_args'=>['version'=>$this->_getVersion()],'q_exec_time'=>time()+86400*365*20],$sign);
+            /*
+            //$qid = $this->exists($sign);
+            $res = $this->_getRecord($this->_sql('select `q_args` from {{:table}} where q_sign='.var_export(strval($sign),true) .' limit 0,1'));
+            $args = (isset($res['q_args']) && !empty($res['q_args']))? unserialize($res['q_args']):[];
+            $version = isset($args['version'])?$args['version']:'';
+            //升级版本
+            */
         }
     }
 }
