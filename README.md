@@ -7,10 +7,11 @@ composer require iry/queue
 
 ### 队列配置
 创建一个class 实现以下方法即可。[代码示例](example/QueueConfig/SettingTest.php)
+一个项目中可以有多个队列，请为每个队列创建一个配置(Setting)
 ```php
 namespace MyNamespace;
 class MySetting implements \iry\queue\Setting{
-    function processMsg($taskId, $taskName, $taskArgs);//该方法是服务端处理异步任务用的
+    function processMsg($taskId, $taskName, $taskArgs,$taskTags);//该方法是服务端处理异步任务用的
     function storage(); // 返回异步任务存储驱动
     
     function beforeCreate($name, $client);// 任务入队前回调, return false 阻止任务继续入队
@@ -21,9 +22,9 @@ class MySetting implements \iry\queue\Setting{
 ### 新任务入队/创建新任务 (客户端)
 ```php 
 use iry\queue\Client
-Client::m(\MyNamespace\MySetting::class)->create($name,$args,$execTime)
+Client::m(\MyNamespace\MySetting::class)->create($name,$args,$tags ,$execTime)
 ```
-**create**(_$name, $args, $execTime, $unique=true_) [代码示例](./example/CreateTask.php)
+**create**(_$name, $args, $tags ,$execTime, $unique=true_) [代码示例](./example/CreateTask.php)
 
 参数名|类型|说明
 ---|---|---

@@ -9,10 +9,11 @@ class SettingTest implements \iry\queue\Setting
      * @param $taskId
      * @param $taskName
      * @param $taskArgs
+     * @param $taskTags
      * @return bool
      */
     //异步服务调用
-    function processMsg($taskId, $taskName, $taskArgs,$tags)
+    function processMsg($taskId, $taskName, $taskArgs,$taskTags)
     {
         // TODO: 异步处理任务在这里执行
         // 建议一个$taskName种类使用一个class单独处理
