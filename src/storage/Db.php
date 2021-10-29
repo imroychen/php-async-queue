@@ -193,7 +193,7 @@ SQL;
             $appVersion = $this->_getVersion()*1;
             $res = $this->_getRecord($this->_sql('select * from {{:table}} where q_sign=' . var_export(strval($sign), true) . ' limit 0,1'));
             if (empty($res)) {
-                $this->_create(['q_name' => 'VERSION', 'q_args' => ['version' => $version], 'q_exec_time' => time() + 86400 * 365 * 20], $sign);
+                $this->_create(['q_name' => 'VERSION', 'q_args' => ['version' => $appVersion], 'q_exec_time' => time() + 86400 * 365 * 20], $sign);
             } else {
                 $args = $this->_decode($res['q_args']);
                 $version = (isset($args['version'])?$args['version']:0)*1;
