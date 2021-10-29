@@ -39,6 +39,8 @@ interface Setting
 
     function storage();
 
+    function tempPath();
+
 
     /**
      * @param string $name 任务名称

@@ -22,6 +22,7 @@ class MySetting implements \iry\queue\Setting{
     function beforeCreate($name, $client);
     //Callback after the task is successfully enqueued
     function afterCreate($id);
+    function tempPath(){}
 }
 ```
 

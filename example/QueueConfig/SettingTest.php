@@ -28,6 +28,10 @@ class SettingTest implements \iry\queue\Setting
 
     }
 
+    function tempDir(){
+        return sys_get_temp_dir();
+    }
+
     /**
      * 任务入队前回调
      * @return bool

@@ -15,10 +15,6 @@ class Base
      */
     protected $_setting;
 
-    private function signalFile($name=''){
-        return sys_get_temp_dir().DIRECTORY_SEPARATOR.'signal-async-queue'.$name;
-    }
-
     /**
      * @param string|Setting $settingCls
      */
@@ -31,7 +27,7 @@ class Base
         }else{
             $this->_setting = $settingCls;
         }
-        $this->_signalFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.'async-queue-signal'.substr(md5(get_class($this->_setting)),8,10);
+        $this->_signalFile = $this->_setting->tempPath().DIRECTORY_SEPARATOR.'async-queue-signal'.substr(md5(get_class($this->_setting)),8,10);
 
         $driver = $this->_setting->storage();
         list($storageCls,$storageArgs)=explode('?',$driver.'?');

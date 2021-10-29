@@ -18,6 +18,7 @@ class MySetting implements \iry\queue\Setting{
     
     function beforeCreate($name, $client);// 任务入队前回调, return false 阻止任务继续入队
     function afterCreate($id);//任务成功入队后回调
+    function tempPath(){}
 }
 ```
 
