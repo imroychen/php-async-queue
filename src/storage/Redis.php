@@ -45,14 +45,14 @@ class Redis extends Base
      *   'q_args'=>$args,
      *   'q_exec_time'=>$execTime,
      * ]
-     * @param bool $unique 是否去重
+     * @param int $uniqueCtrl 去重控制:0不去去重 1/2:去重重复(覆盖)  deduplication (0: allow duplicates, 1/2: overwrite)
      * @return string|bool $queueId|false;
      */
 
-    public function create($data,$unique){
+    public function create($data,$uniqueCtrl){
         if (!empty($data)) {
             $time = $data['q_exec_time']<1 ? (time()-1) : intval($data['q_exec_time']);
-            if(!$unique) $data['_'] = uniqid().'/'.mt_rand(10,99);
+            if(!$uniqueCtrl) $data['_'] = uniqid().'/'.mt_rand(10,99);
             $str = json_encode($data);
             $this->_redis->zAdd($this->_dataset, $time,$str);
             return $str;

@@ -41,10 +41,14 @@ class Client extends Base
      * @param string $name
      * @param array $args
      * @param int $execTime 时间戳/Timestamp
-     * @param bool $unique 是否去重
+     * @param int $uniqueCtrl 去重控制:不去去重 1:直接覆盖 2:跳过 | deduplication (0: allow duplicates, 1: overwrite, 2: skip)
      * @return bool|int|string
      */
-    function create($name,$args,$tags=[],$execTime=0,$unique=true){
+    function create($name,$args,$tags=[],$execTime=0,$uniqueCtrl=1){
+        if(is_bool($uniqueCtrl)){ //兼容之前的版本
+            $uniqueCtrl = $uniqueCtrl?2:0;
+        }
+        $uniqueCtrl = intval($uniqueCtrl);
 
         $data = [
             'q_name'=>$name,
@@ -54,7 +58,7 @@ class Client extends Base
         ];
 
         if(is_callable([$this->_setting,'beforeCreate']) && call_user_func([$this->_setting,'beforeCreate'],$name,$this)) {
-            $queueId = $this->_driver->create($data,$unique);
+            $queueId = $this->_driver->create($data,$uniqueCtrl);
             file_put_contents($this->_signalFile, uniqid());
             if(is_callable([$this->_setting,'afterCreate'])){
                 call_user_func([$this->_setting,'afterCreate'],$queueId);

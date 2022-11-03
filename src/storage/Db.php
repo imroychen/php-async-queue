@@ -65,16 +65,19 @@ abstract class Db extends Base
      *   'q_args'=>$args,
      *   'q_exec_time'=>$execTime,
      * ]
-     * @param bool $unique
+     * @param int $uniqueCtrl 去重控制:不去去重 1:直接覆盖 2:跳过 | deduplication (0: allow duplicates, 1: overwrite, 2: skip)
      * @return int|bool $queueId|false;
      */
-    public function create($data,$unique){
+    public function create($data,$uniqueCtrl){
+        $uniqueCtrl = intval($uniqueCtrl);
 
         $sign = $this->createSign($data);
-        $queueId = $unique?$this->exists($sign):false;
+        $queueId = $uniqueCtrl>0?$this->exists($sign):false;
 
         if(!$queueId) {
             return $this->_create($data, $sign);
+        }elseif ($uniqueCtrl===2){
+            $this->_setExecTime($queueId, $data['q_exec_time']);
         }
 //        else{
 //            $time = intval($data['q_exec_time']);
