@@ -9,7 +9,6 @@ class Service extends Base
 {
 
     protected $_node;// 如果驱动 使用的数据库则为表名， 使用了Redis则为key
-    protected $_actionNs = 'queue';
     private $_msgInfo;
 
     /**
@@ -46,7 +45,7 @@ class Service extends Base
 
             $task = $this->_driver->scan(40);
             if(empty($task)){
-                $this->_waitSignal(-1);
+                $this->_waitSignal();
             }
             elseif(!isset($task['q_name']) || empty($task['q_name'])) {
                 $this->_driver->remove($task['id']);
@@ -71,39 +70,26 @@ class Service extends Base
         }
     }
 
-    /**
-     * @param $eventName
-     * @return queue\Base
-     */
-
-    private function _getClsByEventName($eventName){
-        return $this->_actionNs.'\\'.str_replace(' ','', ucwords(str_replace('_',' ',$eventName)));
-    }
-
-    private function _waitSignal($max){
+    private function _waitSignal(){
         $i = 0;
         $lastMark = file_get_contents($this->_signalFile);
-        $firstExecTime = $this->_driver->getFirstTime();
+        //$firstExecTime = $this->_driver->getFirstTime();
 
         $processStatus = ['    ','.   ','..  ','... ','....','... ','..  ','.    '];
         $pLen = count($processStatus);
 
-        while ($max<0 || $i<$max){
+        while (true){
             sleep(1);
-            $i++;
-
             //最近一条数据时间到就退出扫描
-            if($this->_msgInfo) echo 'Listening: / 正在等待任务: ['.date('Y-m-d H:i:s').'] > '.$processStatus[$i%$pLen].'      '."\r";
-            if($firstExecTime >0 && $firstExecTime<time()){return;}
-            else {
-                $t = file_get_contents($this->_signalFile);
-                //有新的数据插入(mark发生变化退出扫描)
-                if($t!=$lastMark){
-                    if($this->_msgInfo) echo "/Receive new task.发现新任务。                                             \n";
-                    return;
-                }
+            if($this->_msgInfo) echo "\r".'Listening: / 正在等待任务: ['.date('Y-m-d H:i:s').'] > '.$processStatus[$i];
+            $i++;
+            if($i>=$pLen){$i=0;}
+            $t = file_get_contents($this->_signalFile);
+            //有新的数据插入(mark发生变化退出扫描)
+            if($t!=$lastMark){
+                if($this->_msgInfo) echo "\r/Receive new task.发现新任务。                                             \n";
+                return;
             }
-
         }
     }
 
