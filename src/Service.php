@@ -71,25 +71,29 @@ class Service extends Base
     }
 
     private function _waitSignal(){
-        $i = 0;
         $lastMark = file_get_contents($this->_signalFile);
         //$firstExecTime = $this->_driver->getFirstTime();
 
         $processStatus = ['    ','.   ','..  ','... ','....','... ','..  ','.    '];
         $pLen = count($processStatus);
+        $i = $this->_driver->getFirstTime()-time();
+        $i = max(180,$i>0?$i:180);
 
         while (true){
             sleep(1);
-            //最近一条数据时间到就退出扫描
-            if($this->_msgInfo) echo "\r".'Listening: / 正在等待任务: ['.date('Y-m-d H:i:s').'] > '.$processStatus[$i];
-            $i++;
-            if($i>=$pLen){$i=0;}
+            if($i<0){//刻意晚一秒
+                echo "\r/自动刷新。";
+                return;
+            }
+
+            if($this->_msgInfo) echo "\r".'Listening: / 正在等待任务: ['.date('Y-m-d H:i:s').'] > '.$processStatus[$i%$pLen];
             $t = file_get_contents($this->_signalFile);
             //有新的数据插入(mark发生变化退出扫描)
             if($t!=$lastMark){
                 if($this->_msgInfo) echo "\r/Receive new task.发现新任务。                                             \n";
                 return;
             }
+            $i--;
         }
     }
 

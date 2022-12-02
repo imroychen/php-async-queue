@@ -51,4 +51,9 @@ class SettingTest2 implements \iry\queue\Setting
     {
         // TODO: 任务成功入队后 钩子
     }
+
+    function tempPath()
+    {
+        return __DIR__;
+    }
 }
