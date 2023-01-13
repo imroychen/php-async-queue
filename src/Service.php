@@ -28,14 +28,14 @@ class Service extends Base
     /**
      * 监听队列任务
      *
-     * @param callable $callback 处理任务的方法 function ($taskId, $taskName, $taskArgs, $taskTags):bool ;
+     * @param callable $callback 处理任务的方法 function ($taskId, $taskName, $taskArgs, $taskTags,$taskMeta):bool ;
      * @param int $limitTime 最大执行时间 秒 -1:不限制
      */
 
     function listen($callback,$limitTime = -1){
         $isCli = (bool)preg_match("/cli/i", php_sapi_name());
         if(!$isCli){
-            exit('请以CLI模式运行运行 / Please run in CLI mode');
+            exit($this->_t('service.pls run in cli',[]));
         }
 
         $this->_driver->install();
@@ -71,7 +71,7 @@ class Service extends Base
                     $this->_driver->remove($taskId);
                 }
                 if (!is_bool($r)){
-                    echo '无效返回值 -- Invalid return value. <TaskName:'.$task['q_name'].'>'."\n";
+                    echo $this->_t('service.return invalid :0',[$task['q_name']])."\n";
                     sleep(3);
                 }
             }
@@ -97,11 +97,11 @@ class Service extends Base
                 return;
             }
 
-            if($this->_msgInfo) echo "\r".'Listening: / 正在等待任务: ['.date('Y-m-d H:i:s').' / '.$i.'] >'.$processStatus[$i%$pLen];
+            if($this->_msgInfo) echo "\r".'Listening: / '.$this->_t('service.waiting :date :i',['date'=>date('Y-m-d H:i:s'),'i'=>$i]).' >'.$processStatus[$i%$pLen];
             $t = file_get_contents($this->_signalFile);
             //有新的数据插入(mark发生变化退出扫描)
             if($t!=$lastMark){
-                if($this->_msgInfo) echo "\r/Receive new task.发现新任务。                                             \n";
+                if($this->_msgInfo) echo "\r/".$this->_t('service.receive new task',[])."                                             \n";
                 return;
             }
             $i--;

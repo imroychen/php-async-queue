@@ -27,14 +27,12 @@ class Client extends Base
     }
 
     /**
-     * @param string $name
-     * @param array $args
-     * @param int $delay 延时的秒数/Delay in seconds
-     * @param bool $uniq
+     * 废弃
      */
 
-    function delayedExec($name,$args,$tags=[],$delay=1,$uniq=true){
-        $this->create($name,$args,$tags,time()+$delay,$uniq);
+    function delayedExec($name,$args,$customID='',$tags=[],$delay=1,$uniq=true){
+        echo $this->_t('client.method deprecated :0',[__FUNCTION__]);
+        $this->create($name,$args,$customID,$tags,time()+$delay,$uniq);
     }
 
     /**
@@ -44,7 +42,7 @@ class Client extends Base
      * @param int $uniqueCtrl 去重控制:不去去重 1:直接覆盖 2:跳过 | deduplication (0: allow duplicates, 1: overwrite, 2: skip)
      * @return bool|int|string
      */
-    function create($name,$args,$tags=[],$execTime=0,$uniqueCtrl=1){
+    function create($name,$args,$customID='',$tags=[],$execTime=0,$uniqueCtrl=1){
         if(is_bool($uniqueCtrl)){ //兼容之前的版本
             $uniqueCtrl = $uniqueCtrl?2:0;
         }
@@ -53,6 +51,7 @@ class Client extends Base
         $data = [
             'q_name'=>$name,
             'q_args'=>$args,
+            'q_custom_id'=>$customID,
             'q_exec_time'=>$execTime,
             'q_tags'=>is_array($tags)?implode(',',$tags):$tags
         ];

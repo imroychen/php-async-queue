@@ -7,22 +7,24 @@ composer require iry/queue
 ## How to use
 
 ### 1. Queue configuration
-Create a class to implement the following methods。([Example](example/QueueConfig/SettingTest.php))
+>Create a class to implement the following methods。([Example](example/QueueConfig/SettingTest.php))
 There can be multiple queues in a project, please create a configuration for each queue (Setting)
+> 
+> Interface: [src/SettingInterface.php](src/SettingInterface.php)
+
+
 ```php
 namespace MyNamespace;//This is the namespace of your project
 //
-class MySetting implements \iry\queue\Setting{
-    //This method is used by the server to process asynchronous tasks
-    function processMsg($taskId, $taskName, $taskArgs,$taskTags);
-    
-    // return an asynchronous task storage driver
-    function storage(); 
-    //Call back before the task joins the team, return false to prevent the task from continuing to join the team
-    function beforeCreate($name, $client);
-    //Callback after the task is successfully enqueued
-    function afterCreate($id);
+class MySetting extends \iry\queue\Setting{
+    function storage();
     function tempPath(){}
+    
+    //function beforeCreate($name, $client);// 任务入队前回调, return false 阻止任务继续入队
+    
+    //function afterCreate($id);
+    
+    //function i18n(){ return 'en-US'; } // en-US，zh-CN or file://.
 }
 ```
 

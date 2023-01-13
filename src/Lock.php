@@ -11,6 +11,9 @@ class Lock
     public function __construct($key)
     {
         $this->_key = $key;
+        if(function_exists('sem_get')){
+            $this->_hasSem = true;
+        }
     }
 
     /**
@@ -19,7 +22,36 @@ class Lock
      * @return false|mixed
      */
     public function wait($callback){
-        return $this->_lockByFile($callback);
+        if(is_callable($callback)) {
+            if($this->_hasSem) {
+                return $this->_lockByFile($callback);
+            }else{
+                return $this->_lockBySem($callback);
+            }
+        }
+        else{
+            echo "$callback Error";
+            return false;
+        }
+    }
+
+    private function _lockBySem($callback){
+        $key = ftok('/tmp', 'a');
+        $id = sem_get($key);
+        while (1) {
+            if (sem_acquire($id)) {
+                echo "读取任务>";
+                if (is_callable($callback)) {
+                    $r = call_user_func($callback, $this->_key);
+                } else {
+                    $r = false;
+                    echo "$callback Error";
+                }
+                sem_release($id);
+                return $r;
+            }
+        }
+
     }
 
     private function _lockByFile($callback){
@@ -32,12 +64,7 @@ class Lock
             }
 
             if (flock($fp, LOCK_EX)) {
-                if(is_callable($callback)){
-                    $r = call_user_func($callback, $this->_key);
-                }else{
-                    $r = false;
-                    echo "$callback Error";
-                }
+                $r = call_user_func($callback, $this->_key);
 
                 flock($fp, LOCK_UN);
                 fclose($fp);
