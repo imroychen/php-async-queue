@@ -10,14 +10,15 @@ class Service extends Base
 
     protected $_node;// 如果驱动 使用的数据库则为表名， 使用了Redis则为key
     private $_msgInfo;
+    private $_processMsgFunc;
 
     /**
      * 监听队列任务
      * @param int $limitTime 最大执行时间 秒 -1:不限制
      */
 
-    function listen($limitTime = -1){
-        $isCli = preg_match("/cli/i", php_sapi_name()) ? true : false;
+    function listen($callback,$limitTime = -1){
+        $isCli = (bool)preg_match("/cli/i", php_sapi_name());
         if(!$isCli){
             exit('请以CLI模式运行运行 / Please run in CLI mode');
         }
@@ -26,10 +27,7 @@ class Service extends Base
 
         $this->_msgInfo = true;
 
-        $locker = uniqid().'-'.mt_rand(10,99);
         $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.md5(get_class($this->_setting));
-        file_put_contents($lockFile,$locker);//抢占加锁
-
 
         if(!file_exists($this->_signalFile)){
             file_put_contents($this->_signalFile,'');
@@ -40,10 +38,9 @@ class Service extends Base
         $overTime = time()+$limitTime;
         $hasOverTime = ($limitTime>=0);
 
+        $lock = new Lock($lockFile);
         while (1) {
-            if(file_get_contents($lockFile)!=$locker){exit("Quit / 被踢出");}
-
-            $task = $this->_driver->scan(40);
+            $task = $lock->wait(function(){return $this->_driver->scan(40);});
             if(empty($task)){
                 $this->_waitSignal();
             }
@@ -52,22 +49,22 @@ class Service extends Base
             }
             else{
                 $taskId = $task['id'];
-                $taskName = $task['q_name'];
-                $taskArgs = $task['q_args'];
-                $taskTags = isset($task['q_tags'])?$task['q_tags']:'';
-                $r = $this->_setting->processMsg($taskId, $taskName, $taskArgs,$taskTags);
+                $r = call_user_func($callback,$taskId, $task['q_name'], $task['q_args'],(isset($task['q_tags'])?$task['q_tags']:''));
                 if ($r) {
                     $this->_driver->remove($taskId);
                 }
                 if (!is_bool($r)){
-                    echo get_class($this->_setting).'::processMsg  <无效返回值 -- Invalid return value>'."\n";
+                    echo '无效返回值 -- Invalid return value. <TaskName:'.$task['q_name'].'>'."\n";
                     sleep(3);
                 }
             }
-
             //超时退出当前方法
             if($hasOverTime && time()>$overTime){return ;}
         }
+    }
+
+    private function _service(){
+
     }
 
     private function _waitSignal(){
