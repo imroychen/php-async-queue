@@ -77,7 +77,7 @@ abstract class Db extends Base
         if(!$queueId) {
             return $this->_create($data, $sign);
         }elseif ($uniqueCtrl===2){
-            $this->_setExecTime($queueId, $data['q_exec_time']);
+            $this->setExecTime($queueId, $data['q_exec_time']);
         }
 //        else{
 //            $time = intval($data['q_exec_time']);
@@ -114,9 +114,9 @@ abstract class Db extends Base
         return $r!==false;
     }
 
-    private function _setExecTime($id,$time){
+    public function setExecTime($id,$time){
         $id = var_export($id,true);
-        $this->_exec($this->_sql('update {{:table}} set `q_exec_time`='.(time()+30).' where id='.$id),'update')!==false;//锁定30S
+        $this->_exec($this->_sql('update {{:table}} set `q_exec_time`='.var_export($time,true).' where id='.$id),'update')!==false;//锁定30S
     }
 
     /**
@@ -129,7 +129,7 @@ abstract class Db extends Base
         $r =  $this->_getRecord($this->_sql('select * from {{:table}} where `q_exec_time`<'.$time.' order by `q_exec_time`'.' limit 0,1'));
         if(is_array($r) && !empty($r)) {
             if($lockTime>0) {
-                $this->_setExecTime($r['id'],$time+$lockTime);
+                $this->setExecTime($r['id'],$time+$lockTime);
             }
             $r['q_args'] = empty($r['q_args'])? []:$this->_decode($r['q_args']);
             return $r;

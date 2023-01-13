@@ -2,13 +2,8 @@
 
 namespace iry\queue;
 
-interface Setting
+abstract class Setting implements SettingInterface
 {
-    /**
-     * 处理队列的方法 （服务端使用）
-     * @return bool 成功队列将会被移除
-     */
-    function processMsg($taskId,$taskName,$taskArgs,$taskTags);
 
     /**
      * ClassName?参数
@@ -37,9 +32,9 @@ interface Setting
      * @return string
      */
 
-    function storage();
+    abstract function storage();
 
-    function tempPath();
+    abstract function tempPath();
 
 
     /**
@@ -48,10 +43,23 @@ interface Setting
      * @return bool false 阻止创建
      */
 
-    function beforeCreate($name,$client);
+    function beforeCreate($name,$client){
+        return true;
+    }
 
     /**
      * @param string $id
      */
-    function afterCreate($id);
+    function afterCreate($id){
+
+    }
+
+    /**
+     * 为了版本通用 ::cls() 代替 ::CLASS
+     * 5.6之前不支持::CLASS
+     * @return string
+     */
+    static function cls(){
+        return get_called_class();
+    }
 }

@@ -7,13 +7,28 @@ namespace iry\queue;
 
 class Service extends Base
 {
-
-    protected $_node;// 如果驱动 使用的数据库则为表名， 使用了Redis则为key
     private $_msgInfo;
-    private $_processMsgFunc;
+
+    /**
+     * @param mixed $taskId
+     * @param int $seconds 秒数
+     */
+    public function delayTask($taskId,$seconds){
+        $this->_driver->setExecTime($taskId,time()+$seconds);
+    }
+
+    /**
+     * @param mixed $taskId
+     * @param int $time 时间戳
+     */
+    public function delayTaskTo($taskId,$time){
+        $this->_driver->setExecTime($taskId,$time);
+    }
 
     /**
      * 监听队列任务
+     *
+     * @param callable $callback 处理任务的方法 function ($taskId, $taskName, $taskArgs, $taskTags):bool ;
      * @param int $limitTime 最大执行时间 秒 -1:不限制
      */
 
@@ -49,7 +64,9 @@ class Service extends Base
             }
             else{
                 $taskId = $task['id'];
-                $r = call_user_func($callback,$taskId, $task['q_name'], $task['q_args'],(isset($task['q_tags'])?$task['q_tags']:''));
+                if(!isset($task['q_tags'])) $task['q_tags'] = '';
+                if(!isset($task['q_mate'])) $task['q_tags'] = [];
+                $r = call_user_func($callback,$taskId, $task['q_name'], $task['q_args'],$task['q_tags'],$task['q_meta'],$this);
                 if ($r) {
                     $this->_driver->remove($taskId);
                 }
@@ -63,9 +80,6 @@ class Service extends Base
         }
     }
 
-    private function _service(){
-
-    }
 
     private function _waitSignal(){
         $lastMark = file_get_contents($this->_signalFile);

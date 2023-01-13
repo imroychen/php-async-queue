@@ -71,7 +71,7 @@ class Redis extends Base
         return (bool)$res;
     }
 
-    private function _setExecTime($id,$time){
+    public function setExecTime($id,$time){
         $this->_redis->zAdd($this->_dataset, $time,$id );
         return true;
     }
@@ -90,7 +90,7 @@ class Redis extends Base
                 $res = is_array($res) ? $res : [];
                 $res['id'] = $text;
                 if($lockTime>0) {
-                    $this->_setExecTime($text, time() + $lockTime);
+                    $this->setExecTime($text, time() + $lockTime);
                 }
                 return  $res;
             }
