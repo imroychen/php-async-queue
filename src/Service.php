@@ -27,7 +27,7 @@ class Service extends Base
         $this->_msgInfo = true;
 
         $locker = uniqid().'-'.mt_rand(10,99);
-        $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.md5(get_class($this->_setting));
+        $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.md5(__FILE__.';'.get_class($this->_setting));
         file_put_contents($lockFile,$locker);//抢占加锁
 
 
