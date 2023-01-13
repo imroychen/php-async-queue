@@ -30,7 +30,6 @@ class Service extends Base
         $lockFile = sys_get_temp_dir().DIRECTORY_SEPARATOR.md5(__FILE__.';'.get_class($this->_setting));
         file_put_contents($lockFile,$locker);//抢占加锁
 
-
         if(!file_exists($this->_signalFile)){
             file_put_contents($this->_signalFile,'');
         }
